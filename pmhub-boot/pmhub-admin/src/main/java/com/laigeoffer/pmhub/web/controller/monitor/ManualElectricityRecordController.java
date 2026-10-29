@@ -28,6 +28,12 @@ public class ManualElectricityRecordController extends BaseController {
         return getDataTable(records);
     }
 
+    @PreAuthorize("@ss.hasPermi('monitor:manualElectricity:print')")
+    @PostMapping("/printData")
+    public AjaxResult printData(@RequestBody Long[] recordIds) {
+        return success(recordService.selectPrintData(recordIds));
+    }
+
     @PreAuthorize("@ss.hasPermi('monitor:manualElectricity:query')")
     @GetMapping("/{recordId}")
     public AjaxResult getInfo(@PathVariable("recordId") Long recordId) {

@@ -9,6 +9,8 @@ public interface IManualElectricityRecordService {
 
     ManualElectricityRecord selectRecordById(Long recordId);
 
+    List<ManualElectricityRecord> selectPrintData(Long[] recordIds);
+
     int countByDateAndArea(ManualElectricityRecord record);
 
     int insertRecord(ManualElectricityRecord record);

@@ -30,3 +30,11 @@ export function updateManualElectricity(data) {
     data: data
   })
 }
+
+export function printManualElectricityData(recordIds) {
+  return request({
+    url: '/monitor/manualElectricity/printData',
+    method: 'post',
+    data: recordIds
+  })
+}

@@ -25,10 +25,14 @@
       <el-col :span="1.5">
         <el-button v-hasPermi="['monitor:manualElectricity:add']" type="primary" plain icon="el-icon-plus" size="mini" @click="handleAdd">新增登记</el-button>
       </el-col>
+      <el-col :span="1.5">
+        <el-button v-hasPermi="['monitor:manualElectricity:print']" type="info" plain icon="el-icon-printer" size="mini" :disabled="!selectedIds.length" :loading="printLoading" @click="handlePrint">打印所选</el-button>
+      </el-col>
       <right-toolbar :show-search.sync="showSearch" @queryTable="getList" />
     </el-row>
 
-    <el-table v-loading="loading" :data="recordList">
+    <el-table v-loading="loading" :data="recordList" @selection-change="handleSelectionChange">
+      <el-table-column v-if="canPrint" type="selection" width="55" align="center" />
       <el-table-column label="登记日期" align="center" prop="recordDate" width="150" />
       <el-table-column label="区域" align="center" prop="areaName" min-width="160" />
       <el-table-column label="电能用量" align="right" prop="energyKwh" width="180">
@@ -52,6 +56,8 @@
       :limit.sync="queryParams.pageSize"
       @pagination="getList"
     />
+
+    <report-print-preview ref="printPreview" />
 
     <el-dialog :title="dialogTitle" :visible.sync="dialogVisible" width="560px" append-to-body>
       <el-form ref="recordForm" :model="form" :rules="rules" label-width="100px">
@@ -85,16 +91,22 @@ import {
   addManualElectricity,
   getManualElectricity,
   listManualElectricity,
+  printManualElectricityData,
   updateManualElectricity
 } from '@/api/monitor/manualElectricity'
+import ReportPrintPreview from '@/components/ReportPrintPreview'
+import { checkPermi } from '@/utils/permission'
 
 export default {
   name: 'ManualElectricity',
+  components: { ReportPrintPreview },
   data() {
     return {
       loading: false,
       showSearch: true,
       recordList: [],
+      selectedIds: [],
+      printLoading: false,
       total: 0,
       dateRange: [],
       queryParams: {
@@ -113,10 +125,32 @@ export default {
       }
     }
   },
+  computed: {
+    canPrint() {
+      return checkPermi(['monitor:manualElectricity:print'])
+    }
+  },
   created() {
     this.getList()
   },
   methods: {
+    handleSelectionChange(selection) {
+      this.selectedIds = selection.map(row => row.recordId)
+    },
+    async handlePrint() {
+      if (!this.selectedIds.length) return
+      if (this.selectedIds.length > 500) {
+        this.$modal.msgWarning('每次最多打印 500 条记录')
+        return
+      }
+      this.printLoading = true
+      try {
+        const response = await printManualElectricityData(this.selectedIds)
+        await this.$refs.printPreview.open('manualElectricity', response.data)
+      } finally {
+        this.printLoading = false
+      }
+    },
     emptyForm() {
       const now = new Date()
       const month = String(now.getMonth() + 1).padStart(2, '0')
@@ -130,6 +164,7 @@ export default {
     },
     getList() {
       this.loading = true
+      this.selectedIds = []
       const query = {
         ...this.queryParams,
         beginDate: this.dateRange && this.dateRange[0],

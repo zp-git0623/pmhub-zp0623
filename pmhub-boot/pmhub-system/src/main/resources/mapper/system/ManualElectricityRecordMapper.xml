@@ -42,6 +42,15 @@
         where record_id = #{recordId}
     </select>
 
+    <select id="selectRecordsByIds" resultMap="ManualElectricityRecordResult">
+        <include refid="selectRecordColumns"/>
+        where record_id in
+        <foreach collection="array" item="recordId" open="(" separator="," close=")">
+            #{recordId}
+        </foreach>
+        order by record_date desc, area_name asc, record_id asc
+    </select>
+
     <select id="countByDateAndArea" parameterType="ManualElectricityRecord" resultType="int">
         select count(1)
         from monitor_manual_electricity

@@ -1,37 +1,37 @@
-# Local Deployment Progress
+# Progress
 
-- Goal: Run the PmHub monolithic app on Windows and keep it usable from IntelliJ IDEA.
-- Backend: Built `pmhub-boot/pmhub-admin` with JDK 8 and started PID 79444 on `http://127.0.0.1:5010`.
-- Database: MySQL is running as PID 67708 on `127.0.0.1:3306`; schema `laigeoffer-pmhub` has 93 tables. The import SQL's final `CREATE TABLE` statement was missing a semicolon and is fixed.
-- Cache: Redis is running as PID 78824 on `127.0.0.1:6379`, with data isolated under `C:\Users\adminZTY\AppData\Local\Temp\pmhub-redis-b6f825717eb94b97b030b0e5bb32fc29`.
-- Runtime files: API logs/uploads are under `C:\Users\adminZTY\AppData\Local\Temp\pmhub-run-b7268bb64d2546049dda382feee78f5c`.
-- Frontend: Dependencies installed and Vue CLI compiled successfully; dev server is running at `http://localhost:3000` (npm PID 44552).
-- IDEA: Opened `pmhub-boot` in IntelliJ IDEA. Import `pmhub-boot/pom.xml`; set Project SDK and Maven runner JDK to `C:\Program Files\Java\jdk1.8.0_202`; main class is `com.laigeoffer.pmhub.PmhubApplication`.
-- Changed files: `pmhub-boot/sql/pmhub_20240305.sql` (trailing semicolon); `pmhub-boot/pmhub-ui/package.json` (Windows-compatible `dev` script and missing `tributejs` dependency).
-- Verified: Maven package succeeds; Redis returns `PONG`; Swagger UI, frontend HTML/JS assets, and frontend-proxied `/dev-api/captchaImage` return HTTP 200.
-- Runtime: MySQL PID 67708, Redis PID 78824, backend PID 79444, frontend npm PID 44552. Stop these processes from their respective run configurations or via Task Manager when finished.
-- Remaining: None for the local startup. JDK 8 is required for running/building in IDEA; Node dependencies are installed under the single-app frontend.
+## Goal
+Implement a reusable HiPrint report-template platform in `pmhub-boot/pmhub-ui`, initially for manual electricity registration printing.
 
-## Startup Guide
+## Assumptions
+- The target frontend is `pmhub-boot/pmhub-ui` (Vue 2.6.12, Node 16 project configuration).
+- `CcSimple/vue-plugin-hiprint` npm package version `0.0.62` is the selected printing engine.
+- First data source is the controlled `manualElectricity` provider; arbitrary SQL report design is out of scope.
+- Printing uses browser preview/print. Silent printing/client integration is out of scope.
+- Existing untracked `docs/本地启动与IDEA操作说明.html` must remain untouched.
 
-- Goal: Provide a detailed Chinese HTML guide for starting the monolith and microservice editions from the command line and IntelliJ IDEA.
-- Changed: Added `docs/本地启动与IDEA操作说明.html` with module entry points, ports, SQL import commands, IDEA JDK/Maven settings, frontend commands, and troubleshooting.
-- Credentials: Verified the seeded local `admin` password `123456` against the BCrypt hashes in both monolith and microservice SQL. The guide distinguishes local seed credentials from online demo credentials, which the README says to obtain via public account 「苍何」 and reply `pmhub`.
-- Verification: HTML structure, command references, and seeded admin password checked against repository configuration; BCrypt matches confirmed with the project security library.
+## Plan
+1. [x] Add report-template persistence/API/permissions and batch manual-electricity print-data API.
+2. [x] Add HiPrint dependency, local print CSS, provider field palette, template list/design pages and reusable preview.
+3. [x] Add selection/template/preview/print flow to manual electricity page.
+4. [x] Run focused frontend lint and backend compile; review the change set.
 
-## Redis Startup Guide
+## Implementation Record
+- Backend: added `ReportTemplate` domain, mapper/XML, service, and controller for template list/options/detail/create/update/delete. Template JSON is checked for a non-empty HiPrint `panels` array. Detail access allows query/edit permissions; print-only access remains limited to active `manualElectricity` templates.
+- Backend: added selected-record print-data query, with empty/invalid/duplicate IDs rejected and a 500-record maximum.
+- Database: `pmhub-boot/sql/report_template.sql` creates the template table and menu permissions. The migration has not been executed; it grants the new permissions to the `admin` role only.
+- Frontend: added `vue-plugin-hiprint@0.0.62` and `jquery`, local print CSS/vendor assets, the manual-electricity field provider/default template, a reusable preview/print component, report template management/designer pages, and the selected-record print action.
+- Files: `pmhub-boot/pmhub-admin/src/main/java/com/laigeoffer/pmhub/web/controller/report/ReportTemplateController.java`; `pmhub-boot/pmhub-admin/src/main/java/com/laigeoffer/pmhub/web/controller/monitor/ManualElectricityRecordController.java`; `pmhub-boot/pmhub-system/src/main/java/com/laigeoffer/pmhub/system/domain/ReportTemplate.java`; `pmhub-boot/pmhub-system/src/main/java/com/laigeoffer/pmhub/system/mapper/ReportTemplateMapper.java`; `pmhub-boot/pmhub-system/src/main/resources/mapper/system/ReportTemplateMapper.xml`; `pmhub-boot/pmhub-system/src/main/java/com/laigeoffer/pmhub/system/service/IReportTemplateService.java`; `pmhub-boot/pmhub-system/src/main/java/com/laigeoffer/pmhub/system/service/impl/ReportTemplateServiceImpl.java`; and the manual-electricity mapper/service/controller files.
+- Frontend files: `pmhub-boot/pmhub-ui/package.json`; `pmhub-boot/pmhub-ui/public/index.html`; `pmhub-boot/pmhub-ui/public/hiprint/`; `pmhub-boot/pmhub-ui/src/api/report/template.js`; `pmhub-boot/pmhub-ui/src/api/monitor/manualElectricity.js`; `pmhub-boot/pmhub-ui/src/utils/reportPrint.js`; `pmhub-boot/pmhub-ui/src/components/ReportPrintPreview/index.vue`; `pmhub-boot/pmhub-ui/src/views/report/template/index.vue`; `pmhub-boot/pmhub-ui/src/views/report/template/designer.vue`; and `pmhub-boot/pmhub-ui/src/views/monitor/manualElectricity/index.vue`.
+- Permission follow-up: template detail access includes `report:template:edit`, so users granted edit without query can open the designer, including for stopped templates.
 
-- Goal: Add safe, detailed local Redis startup instructions to the existing Chinese HTML guide.
-- Changed: Expanded `docs/本地启动与IDEA操作说明.html` with the installed Windows Redis 5.0.14.1 foreground command, `PONG` check, IDEA Terminal steps, local connection/password guidance, Docker alternative, normal shutdown, and troubleshooting.
-- Constraints: Keep Redis bound to `127.0.0.1`; do not modify application/Nacos configuration. The Docker image example is illustrative and was not run or compatibility-tested.
-- Verification: Checked the local Redis install path, server/client executables, single-app Redis config, and microservice example config. Redis server help confirms direct CLI startup is supported; HTML section/detail tags are balanced and all 14 local anchors resolve. This documentation pass did not start or stop Redis.
-- Next: Run the documented foreground command when Redis is needed; confirm `PONG` before starting the Java backend.
+## Verification
+- Focused ESLint passed with `--no-ignore` for the seven changed frontend JS/Vue files.
+- `NODE_OPTIONS=--openssl-legacy-provider npm run build:prod` passed. Build reports the existing `src/utils/generator/js.js` missing `trigger` export warning and bundle-size warnings.
+- `mvn -o -pl pmhub-admin -am -DskipTests compile` passed using JDK 8. The default Maven environment uses JDK 21 and fails in the existing Lombok/Javac integration (`JCImport.qualid` missing).
+- Authenticated browser workflow was not verified because the local browser is at the login page and no test credentials were provided. Do not infer print usability from compilation alone.
 
-## Manual electricity registration page
-
-- Goal: Add a System Monitoring page for manually maintaining daily electricity usage by area, with add/edit/view/list functions.
-- Changed: Added `pmhub-boot/pmhub-system` domain/mapper/service, `pmhub-boot/pmhub-admin` controller, frontend API/page, and deployable SQL migration `pmhub-boot/sql/monitor_manual_electricity.sql`.
-- Data model: One row per area/date; `energy_kwh` is non-negative with up to 3 decimal places; date+area is unique. Delete was intentionally not added because it was not requested.
-- Menu/permissions: Migration creates the page under System Monitoring plus query/add/edit permissions and grants them to active admin roles.
-- Verification: Backend `mvn -pl pmhub-admin -am -DskipTests package` passed with JDK 8; frontend `NODE_OPTIONS=--openssl-legacy-provider npm run build:prod` passed with existing unrelated warnings; focused ESLint passed with no warnings; mapper XML parsed successfully; `git diff --check` passed. The migration was also applied to the local `laigeoffer-pmhub` database using MySQL `--default-character-set=utf8mb4`; the table and four menu/permission rows were verified.
-- Known constraint: The repository's default Node build fails without `NODE_OPTIONS=--openssl-legacy-provider`; the project already uses this flag in its dev script.
+## Open questions
+- Apply the SQL in a development database, then grant template management and/or print permissions to the intended business roles.
+- After login, verify template creation, drag positioning, save/reopen, sample preview, selected-record preview, and browser printing.
+- Future data sources can add provider definitions keyed by `reportCode`; arbitrary SQL report design remains out of scope.

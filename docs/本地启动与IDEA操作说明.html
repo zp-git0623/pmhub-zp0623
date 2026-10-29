@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>PmHub 本地启动与 IDEA 操作说明</title>
+  <style>
+    :root{--ink:#182626;--muted:#526565;--line:#d8e1de;--paper:#fff;--canvas:#f2f6f4;--green:#176b55;--green-soft:#e5f2ed;--amber-soft:#fbf3df;--code:#172323;--code-ink:#e5f1ed;--link:#075f9a}
+    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:24px}
+    body{margin:0;background:var(--canvas);color:var(--ink);font:16px/1.68 "Segoe UI","Microsoft YaHei",sans-serif}
+    a{color:var(--link);text-underline-offset:3px}.shell{max-width:1180px;margin:0 auto;padding:30px 24px 72px}
+    header{border-bottom:1px solid var(--line);padding:10px 0 24px}.eyebrow{margin:0 0 8px;color:var(--green);font-size:13px;font-weight:700}
+    h1{margin:0;font-size:38px;line-height:1.25}.subtitle{max-width:780px;margin:12px 0 0;color:var(--muted)}
+    .layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:34px;margin-top:26px;align-items:start}
+    nav{position:sticky;top:18px;border-right:1px solid var(--line);padding:4px 18px 10px 0}nav strong{display:block;margin-bottom:8px;font-size:14px}
+    nav a{display:block;padding:5px 0;color:var(--muted);font-size:14px;text-decoration:none}nav a:hover{color:var(--green);text-decoration:underline}
+    main{min-width:0}section{margin:0 0 34px}h2{margin:0 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line);font-size:24px;line-height:1.35}
+    h3{margin:23px 0 8px;font-size:18px;line-height:1.4}p{margin:9px 0}ul,ol{padding-left:24px}li{margin:5px 0}
+    .callout{margin:14px 0;padding:13px 16px;border-left:4px solid var(--green);background:var(--green-soft)}.warning{border-left-color:#a87517;background:var(--amber-soft)}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.panel{padding:14px 16px;border:1px solid var(--line);background:var(--paper)}.panel h3{margin:0 0 5px}
+    table{width:100%;border-collapse:collapse;margin:12px 0;background:var(--paper);font-size:14px}th,td{padding:9px 11px;border:1px solid var(--line);text-align:left;vertical-align:top}th{background:#eaf0ed}
+    code{font-family:Consolas,"Cascadia Code",monospace;font-size:.92em;overflow-wrap:anywhere}pre{margin:10px 0 14px;padding:15px 17px;overflow:auto;background:var(--code);color:var(--code-ink);border-radius:4px;font:13px/1.6 Consolas,"Cascadia Code",monospace;tab-size:2}pre code{font:inherit;overflow-wrap:normal}
+    .step{display:grid;grid-template-columns:30px minmax(0,1fr);gap:11px;margin:15px 0}.num{width:28px;height:28px;display:grid;place-items:center;border:1px solid #aac9bd;border-radius:50%;color:var(--green);font-weight:700;font-size:14px}.step h3{margin:1px 0 4px}
+    details{margin:10px 0;border:1px solid var(--line);background:var(--paper)}summary{padding:12px 15px;color:var(--green);font-weight:700;cursor:pointer}details>div{padding:0 15px 14px}
+    .small{font-size:14px;color:var(--muted)}footer{margin-top:38px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+    @media(max-width:800px){.layout{grid-template-columns:1fr;gap:18px}nav{position:static;border-right:0;border-bottom:1px solid var(--line);padding:0 0 14px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:14px}nav strong{grid-column:1/-1}.grid{grid-template-columns:1fr}}
+    @media(max-width:520px){.shell{padding:20px 15px 48px}body{font-size:15px}h1{font-size:30px}h2{font-size:21px}table{display:block;overflow:auto;white-space:nowrap}pre{font-size:12px;padding:12px}}
+    @media print{body{background:#fff;font-size:11pt}.shell{max-width:none;padding:0}.layout{display:block}nav{display:none}header{padding-top:0}.panel,table,details{break-inside:avoid}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f1f3f2;color:#111;border:1px solid #bbb}a{color:#111;text-decoration:none}h2,h3{break-after:avoid}}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header><p class="eyebrow">PMHUB · WINDOWS 本地开发</p><h1>PmHub 本地启动与 IDEA 操作说明</h1><p class="subtitle">覆盖单体版与微服务版的依赖准备、命令行启动、IntelliJ IDEA 配置、前端登录和常见问题。首次运行建议先按单体版步骤验证环境。</p></header>
+  <div class="layout">
+    <nav aria-label="目录"><strong>本页目录</strong><a href="#choose">先选版本</a><a href="#redis">Redis 启动与验证</a><a href="#single">单体版启动</a><a href="#idea-single">IDEA 启动单体版</a><a href="#login">前端登录账号</a><a href="#micro">微服务版启动</a><a href="#idea-micro">IDEA 启动微服务</a><a href="#troubleshoot">常见问题</a><a href="#stop">停止服务</a></nav>
+    <main>
+      <section id="choose"><h2>1. 先选版本</h2>
+        <div class="grid"><div class="panel"><h3>单体版（推荐首次启动）</h3><p>后端入口在 <code>pmhub-boot</code>，需要 MySQL、Redis；页面代理到 5010 端口。</p><p>适合本机试运行、调试业务和 IDEA 单服务启动。</p></div><div class="panel"><h3>微服务版</h3><p>后端位于仓库根目录，由 Gateway、Auth、System、Project 等服务组成；依赖 MySQL、Redis 和 Nacos。</p><p>适合调试服务拆分、注册发现和配置中心。</p></div></div>
+        <div class="callout warning"><strong>不要混用前后端目录：</strong>单体前端是 <code>pmhub-boot\pmhub-ui</code>，微服务前端是根目录 <code>pmhub-ui</code>。它们分别代理到 <code>5010</code> 和 <code>6880</code>。</div>
+        <h3>环境要求</h3><table><thead><tr><th>组件</th><th>说明</th></tr></thead><tbody><tr><td>JDK</td><td>使用 JDK 8。IDEA 的 Project SDK、Maven Importer 和 Maven Runner 均设为 JDK 8。</td></tr><tr><td>Maven</td><td>README 标注 Maven 3.9.1；确保 Maven 进程实际运行在 JDK 8 上。</td></tr><tr><td>MySQL</td><td>单体 SQL 来自 MySQL 8.0 导出；按本机数据库配置连接信息。</td></tr><tr><td>Redis</td><td>单体默认连接 <code>127.0.0.1:6379</code>，无密码。</td></tr><tr><td>Node.js / npm</td><td>用于启动 Vue 前端；按对应目录中的 lockfile 选择安装命令。</td></tr></tbody></table>
+      </section>
+      <section id="redis"><h2>Redis：本地启动与验证（两种版本通用）</h2>
+        <div class="callout"><strong>本机可以直接使用现有安装：</strong><code>D:\software\redis\5.0.14.1</code> 内有 <code>redis-server.exe</code> 和 <code>redis-cli.exe</code>，无需为启动 Redis 先启动整套微服务。单体本地配置为 <code>127.0.0.1:6379</code>、数据库 <code>0</code>、<strong>密码为空</strong>；前端登录密码 <code>123456</code> 不是 Redis 密码。下面命令均在 <strong>PowerShell</strong> 执行。</div>
+        <h3>R.1 先确认是否已经启动</h3>
+        <pre><code>Test-NetConnection 127.0.0.1 -Port 6379
+&amp; 'D:\software\redis\5.0.14.1\redis-cli.exe' -h 127.0.0.1 -p 6379 PING</code></pre>
+        <p><code>TcpTestSucceeded : True</code> 只说明端口可连接；<code>PING</code> 返回 <code>PONG</code> 才说明 Redis 能正常响应。已经返回 <code>PONG</code> 就不用重复启动；若连接被拒绝，再按 R.2 操作。Windows 与 Docker 两种方式选一种，不要同时占用 6379。</p>
+        <h3>R.2 使用本机现有 Windows Redis 启动</h3>
+        <p>新开 PowerShell 窗口，复制下面整段。数据单独放在当前用户的 <code>AppData\Local\PmHub\redis-data</code>，不会写进 Redis 安装目录或项目源码目录：</p>
+        <pre><code>$redisHome = 'D:\software\redis\5.0.14.1'
+$redisData = Join-Path $env:LOCALAPPDATA 'PmHub\redis-data'
+New-Item -ItemType Directory -Path $redisData -Force | Out-Null
+&amp; "$redisHome\redis-server.exe" --bind 127.0.0.1 --port 6379 --protected-mode yes --dir "$redisData" --appendonly yes</code></pre>
+        <p>看到 <code>Ready to accept connections</code> 后，<strong>保持这个窗口开启</strong>，另开终端执行 R.1 的 <code>PING</code> 验证，再启动 Java 后端。命令以前台进程方式运行，不会注册 Windows 服务；重启电脑后需要重新执行。换电脑时将 <code>$redisHome</code> 替换为实际解压目录。</p>
+        <p class="small">该命令沿用本机已有的 Windows 5.0.14.1 包，仅用于本地开发，不代表测试或生产部署方案。无密码示例只允许本机访问，不要为了远程连接改为对公网开放。</p>
+        <h3>R.3 从 IDEA 中启动</h3>
+        <ol><li>打开 IDEA 底部 <strong>Terminal</strong>，选择 PowerShell，执行 R.2 的整段命令，保留该终端标签页。</li><li>再打开一个 Terminal 标签页，执行 R.1 的 <code>PING</code>；看到 <code>PONG</code> 后，再用 Run / Debug 启动单体主类或各微服务主类。</li><li>IDEA 的 Java Run 配置不会自动启动 Redis。停止 Java 后端也不会自动停止 Redis；如要停止 Redis，见 R.5。</li></ol>
+        <h3>R.4 核对项目的 Redis 连接配置</h3>
+        <p>单体版核对 <code>D:\projects\pmhub\pmhub-boot\pmhub-admin\src\main\resources\application-local.yml</code> 中已有的 <code>spring.redis</code> 节点；下面只是配置片段，<strong>不要覆盖整个文件，也不要重复添加顶层 spring 节点</strong>：</p>
+        <pre><code>spring:
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    database: 0
+    password: ""</code></pre>
+        <p>微服务版在 Nacos 中检查当前 profile 对应的配置，例如 <code>application-dev.yml</code> 和各服务自己的 <code>*-dev.yml</code>，以实际生效的 <code>spring.redis</code> 为准。后端从 Windows / IDEA 启动且 Redis 也在本机时使用 <code>127.0.0.1</code>；后端也在 Docker 容器里时，不要把容器内的 <code>127.0.0.1</code> 当成宿主机。使用仓库 Compose 且处于同一网络的后端应连接 Redis 服务名 <code>pmhub-redis</code>。</p>
+        <p>若你自行给 Redis 设置了密码，需要同步设置后端的 <code>spring.redis.password</code>；没有设置密码时保持为空，不要填写前端登录密码。</p>
+        <details><summary>备用方式：已有 Docker Desktop 时启动 Redis</summary><div>
+          <p>先启动 Docker Desktop，使用 Linux containers，并确认 <code>docker version</code> 能显示 Server 信息。确认 Windows Redis 未占用 6379 后，<strong>首次创建</strong>执行：</p>
+          <pre><code>docker run -d --name pmhub-redis-local -p 127.0.0.1:6379:6379 -v pmhub-redis-local-data:/data redis:7.4 redis-server --appendonly yes
+docker exec pmhub-redis-local redis-cli PING</code></pre>
+          <p>预期返回 <code>PONG</code>。示例将端口发布到宿主机回环地址，数据保留在命名卷中；Redis 7.4 是备用镜像示例，本次未运行该镜像或验证完整项目兼容性。不要同时再用仓库 Compose 启动另一个占用 6379 的 Redis。</p>
+          <p>下次已有同名容器时，不要重复 <code>docker run</code>，而是执行：</p>
+          <pre><code>docker start pmhub-redis-local
+docker exec pmhub-redis-local redis-cli PING</code></pre>
+          <p>容器名称冲突时先用 <code>docker ps -a --filter "name=pmhub-redis-local"</code> 查看，不要直接删除现有容器或数据卷。</p>
+        </div></details>
+        <h3>R.5 停止 Redis</h3>
+        <p>先停止依赖它的 Java 服务。Windows 前台方式可在 Redis 窗口按 <code>Ctrl+C</code>，或在另一个终端执行下面命令正常关闭本地无密码实例：</p>
+        <pre><code>&amp; 'D:\software\redis\5.0.14.1\redis-cli.exe' -h 127.0.0.1 -p 6379 SHUTDOWN</code></pre>
+        <p>如果采用上面的 Docker 方式，则执行：</p>
+        <pre><code>docker stop pmhub-redis-local</code></pre>
+        <p class="small">参考：<a href="https://redis.io/docs/latest/operate/oss_and_stack/management/config/">Redis 命令行配置</a>、<a href="https://redis.io/docs/latest/develop/tools/cli/">redis-cli 连接与验证</a>、<a href="https://docs.docker.com/engine/network/port-publishing/">Docker 端口映射</a>、<a href="https://docs.docker.com/compose/how-tos/networking/">Compose 服务网络</a>。这些无密码命令仅针对本机隔离开发环境。</p>
+      </section>
+      <section id="single"><h2>2. 单体版：命令行启动</h2>
+        <div class="callout"><strong>本机已验证的配置：</strong>JDK 8、MySQL <code>127.0.0.1:3306/laigeoffer-pmhub</code>、Redis <code>127.0.0.1:6379</code>、后端端口 <code>5010</code>。数据库用户名、密码以 <code>application-local.yml</code> 为准，仅用于隔离的本地开发环境，不要用于生产。</div>
+        <div class="step"><span class="num">1</span><div><h3>确认 Java 与 Maven 使用 JDK 8</h3><p>在 PowerShell 设置当前终端环境；JDK 安装位置不同时替换路径。</p><pre><code>$env:JAVA_HOME = 'C:\Program Files\Java\jdk1.8.0_202'
+$env:Path = "$env:JAVA_HOME\bin;$env:Path"
+java -version
+mvn -version</code></pre><p class="small">两条版本输出都应显示 Java 1.8。若 Maven 显示 Java 21 等其他版本，先修正 <code>JAVA_HOME</code>。</p></div></div>
+        <div class="step"><span class="num">2</span><div><h3>启动 MySQL 和 Redis</h3><p>Redis 请先按<a href="#redis">「Redis 启动与验证」</a>操作并确认返回 <code>PONG</code>，再确认 MySQL 已运行并检查端口：</p><pre><code>Test-NetConnection 127.0.0.1 -Port 3306
+Test-NetConnection 127.0.0.1 -Port 6379</code></pre><p>配置位置：<code>pmhub-boot\pmhub-admin\src\main\resources\application-local.yml</code>。</p></div></div>
+        <div class="step"><span class="num">3</span><div><h3>导入单体数据库</h3><p>SQL 文件为 <code>pmhub-boot\sql\pmhub_20240305.sql</code>。在 <strong>cmd.exe</strong> 执行，提示时输入 MySQL 密码：</p><pre><code>mysql -u root -p -h 127.0.0.1 -P 3306 &lt; "D:\projects\pmhub\pmhub-boot\sql\pmhub_20240305.sql"</code></pre><p>也可用 Navicat 执行。脚本会创建 <code>laigeoffer-pmhub</code> 并重建其中部分表；导入前备份同名数据库里的重要数据。</p></div></div>
+        <div class="step"><span class="num">4</span><div><h3>启动后端</h3><p>新开 PowerShell 窗口：</p><pre><code>cd D:\projects\pmhub\pmhub-boot
+mvn -pl pmhub-admin -am -DskipTests package
+java -jar .\pmhub-admin\target\pmhub-admin.jar</code></pre><p>启动成功后后端地址为 <code>http://127.0.0.1:5010</code>。</p></div></div>
+        <div class="step"><span class="num">5</span><div><h3>启动单体前端</h3><pre><code>cd D:\projects\pmhub\pmhub-boot\pmhub-ui
+npm ci
+npm run dev -- --port 3000</code></pre><p><code>npm ci</code> 按 <code>package-lock.json</code> 安装依赖。浏览器打开 <a href="http://localhost:3000">http://localhost:3000</a>。</p></div></div>
+      </section>
+      <section id="idea-single"><h2>3. IDEA：启动单体版</h2><ol>
+        <li>IDEA 选择 <strong>Open</strong>，打开 <code>D:\projects\pmhub\pmhub-boot</code>，导入其中的 <code>pom.xml</code> 为 Maven 工程。</li>
+        <li><strong>File → Project Structure → Project</strong>：Project SDK 设为 JDK 8。</li>
+        <li><strong>Settings → Build Tools → Maven</strong>：Maven Importer JDK、Runner JRE 均设为该 JDK 8；Maven Home 选已安装 Maven 或 IDEA bundled Maven。</li>
+        <li>等待同步，在 <code>pmhub-admin</code> 中找到主类 <code>com.laigeoffer.pmhub.PmhubApplication</code>。</li>
+        <li>右键选择 <strong>Run 'PmhubApplication.main()'</strong>。手工配置时：类型 <strong>Application</strong>；Main class 填上述类名；Use classpath of module 选 <code>pmhub-admin</code>；Working directory 为 <code>D:\projects\pmhub\pmhub-boot</code>；JRE 选 JDK 8。</li>
+        <li>运行后端前先启动 MySQL，并按<a href="#redis">「Redis 启动与验证」</a>确认 Redis 返回 <code>PONG</code>。IDEA Terminal 中进入 <code>D:\projects\pmhub\pmhub-boot\pmhub-ui</code>，执行 <code>npm ci</code> 和 <code>npm run dev -- --port 3000</code>。</li>
+      </ol><div class="callout warning">若 IDEA 导入的是仓库根目录微服务 Maven 工程，不要在该工程中启动单体主类；单体工程应导入 <code>pmhub-boot\pom.xml</code>。</div></section>
+      <section id="login"><h2>4. 前端登录账号与密码</h2><p>登录页：单体版 <a href="http://localhost:3000">http://localhost:3000</a>；微服务版 <a href="http://localhost:1024">http://localhost:1024</a>。</p><div class="callout warning"><strong>演示登录密码没有在当前仓库文档中公开。</strong>本地导入仓库初始化 SQL 后，超级管理员账号为 <code>admin</code>，密码为 <code>123456</code>。我用项目所依赖的 BCrypt 编码器核对过单体 SQL 与微服务 System SQL 中的初始密码哈希。该账号仅适用于本地初始数据库，首次登录后建议修改。仓库 README 提及的在线演示账号是另一套账号：关注微信公众号「苍何」，回复 <code>pmhub</code> 获取。数据库连接口令也不是前端登录密码。</div><p>使用自己的本地账号时，确认已导入初始化数据，或通过项目用户管理/密码重置流程设定。不要把真实账号密码提交到 Git。</p><p>Nacos 控制台账号与 PmHub 前端账号不同：仓库 README 标注本地 Nacos 默认用户名和密码均为 <code>nacos</code>。</p></section>
+      <section id="micro"><h2>5. 微服务版：命令行启动</h2>
+        <div class="callout warning">微服务需要 MySQL、Redis、Nacos 和 Nacos 配置数据。根目录 <code>docker\docker-compose.yml</code> 是整套容器部署配置，不等同于只启动基础依赖。</div>
+        <h3>5.1 准备配置中心和数据库</h3><ol><li>启动 MySQL，按<a href="#redis">「Redis 启动与验证」</a>启动 Redis 并确认返回 <code>PONG</code>。各服务默认使用 Nacos <code>127.0.0.1:8848</code>，Nacos 默认账号密码为 <code>nacos</code>。</li><li>SQL 位于根目录 <code>sql</code>。Nacos 本地安装的 <code>conf\application.properties</code> 需配置为本机可访问的数据库地址，并与 Nacos 数据库用户配置匹配。</li></ol>
+        <p>以下命令在 <strong>cmd.exe</strong> 中逐条执行，按提示输入 MySQL 密码：</p><pre><code>mysql -u root -p -h 127.0.0.1 -P 3306 &lt; "D:\projects\pmhub\sql\pmhub_nacos.sql"
+mysql -u root -p -h 127.0.0.1 -P 3306 &lt; "D:\projects\pmhub\sql\pmhub-system.sql"
+mysql -u root -p -h 127.0.0.1 -P 3306 &lt; "D:\projects\pmhub\sql\pmhub-project.sql"
+mysql -u root -p -h 127.0.0.1 -P 3306 &lt; "D:\projects\pmhub\sql\pmhub-workflow.sql"
+mysql -u root -p -h 127.0.0.1 -P 3306 &lt; "D:\projects\pmhub\sql\pmhub-gen.sql"</code></pre>
+        <p class="small">Nacos 使用 MySQL 时，按其 <code>application.properties</code> 配置的库名、用户和密码准备连接；仓库示例库名为 <code>pmhub-nacos</code>。仅使用 Seata 时再导入 <code>sql\pmhub_seata.sql</code>。</p>
+        <p>在 Nacos 的 <code>bin</code> 目录启动（替换为实际 Nacos 安装路径）：</p><pre><code>cd C:\path\to\nacos\bin
+.\startup.cmd -m standalone</code></pre>
+        <p>打开 <a href="http://localhost:8848/nacos">http://localhost:8848/nacos</a>，确认以下 Data ID 存在且连接配置已按本机环境修改：<code>application-dev.yml</code>、<code>pmhub-gateway-dev.yml</code>、<code>pmhub-auth-dev.yml</code>、<code>pmhub-system-dev.yml</code>、<code>pmhub-project-dev.yml</code>、<code>pmhub-workflow-dev.yml</code>、<code>pmhub-gen-dev.yml</code>、<code>pmhub-job-dev.yml</code>、<code>pmhub-monitor-dev.yml</code>。</p>
+        <h3>5.2 构建和启动服务</h3><p>PowerShell 使用 JDK 8 设置好 <code>JAVA_HOME</code> 后，在仓库根目录构建：</p><pre><code>cd D:\projects\pmhub
+mvn -DskipTests package</code></pre><p>每条 Java 命令在单独终端窗口运行，顺序为 Gateway、Auth、业务服务：</p><pre><code>java -jar .\pmhub-gateway\target\pmhub-gateway.jar
+java -jar .\pmhub-auth\target\pmhub-auth.jar
+java -jar .\pmhub-modules\pmhub-system\target\pmhub-system.jar
+java -jar .\pmhub-modules\pmhub-project\target\pmhub-project.jar
+java -jar .\pmhub-modules\pmhub-workflow\target\pmhub-workflow.jar
+java -jar .\pmhub-modules\pmhub-gen\target\pmhub-gen.jar
+java -jar .\pmhub-modules\pmhub-job\target\pmhub-job.jar
+java -jar .\pmhub-monitor\target\pmhub-monitor.jar</code></pre>
+        <table><thead><tr><th>服务</th><th>IDEA 主类</th><th>端口</th></tr></thead><tbody>
+          <tr><td>Gateway</td><td><code>com.laigeoffer.pmhub.gateway.PmHubGatewayApplication</code></td><td>6880</td></tr><tr><td>Auth</td><td><code>com.laigeoffer.pmhub.auth.PmHubAuthApplication</code></td><td>6800</td></tr><tr><td>System</td><td><code>com.laigeoffer.pmhub.system.PmHubSystemApplication</code></td><td>6801</td></tr><tr><td>Gen</td><td><code>com.laigeoffer.pmhub.gen.PmHubGenApplication</code></td><td>6802</td></tr><tr><td>Job</td><td><code>com.laigeoffer.pmhub.job.PmHubJobApplication</code></td><td>6803</td></tr><tr><td>Project</td><td><code>com.laigeoffer.pmhub.project.PmHubProjectApplication</code></td><td>6806</td></tr><tr><td>Workflow</td><td><code>com.laigeoffer.pmhub.workflow.PmHubWorkflowApplication</code></td><td>6808</td></tr><tr><td>Monitor</td><td><code>com.laigeoffer.pmhub.monitor.PmHubMonitorApplication</code></td><td>6888</td></tr>
+        </tbody></table><p>监控面板：<a href="http://localhost:6888/wallboard">http://localhost:6888/wallboard</a>。Sentinel、Seata、RocketMQ、SkyWalking 等外部组件按需启动。</p>
+        <h3>5.3 启动微服务前端</h3><pre><code>cd D:\projects\pmhub\pmhub-ui
+npm install
+npm run serve -- --port 1024</code></pre><p>浏览器打开 <a href="http://localhost:1024">http://localhost:1024</a>。前端代理到 Gateway <code>http://127.0.0.1:6880</code>。遇到 OpenSSL 错误时，可在当前 PowerShell 设置后重试：</p><pre><code>$env:NODE_OPTIONS = '--openssl-legacy-provider'
+npm run serve -- --port 1024</code></pre>
+      </section>
+      <section id="idea-micro"><h2>6. IDEA：启动微服务</h2><ol><li>IDEA 打开 <code>D:\projects\pmhub</code>，导入根目录 <code>pom.xml</code>，等待多模块 Maven 同步完成。</li><li>Project SDK、Maven Importer JDK、Maven Runner JRE 全部设为 JDK 8。</li><li>先启动 MySQL、Redis、Nacos，并确认 Nacos 数据源和 Data ID 可用。</li><li>在各模块找到对应 Application 主类，右键 <strong>Run</strong>。顺序：Gateway、Auth、System、Project、Workflow、Gen、Job、Monitor；各主类和端口见上表。</li><li>确认服务启动并注册到 Nacos 后，在 IDEA Terminal 进入根目录 <code>pmhub-ui</code>，执行 <code>npm install</code>、<code>npm run serve -- --port 1024</code>。</li></ol><p>手工配置时选 <strong>Application</strong>，Main class 填上表全限定类名，Use classpath of module 选对应 Maven 模块（如 <code>pmhub-gateway</code>、<code>pmhub-system</code>），JRE 选 JDK 8。默认 profile 为 <code>dev</code>，Nacos 地址在各模块的 <code>src\main\resources\bootstrap.yml</code>。</p></section>
+      <section id="troubleshoot"><h2>7. 常见问题</h2>
+        <details><summary>Maven 报 Java 版本不支持，或 IDEA 与终端结果不同</summary><div><p>检查 <code>java -version</code>、<code>mvn -version</code> 和 IDEA 的 Project SDK、Maven Importer JDK、Runner JRE，全部设为 JDK 8。PowerShell 的 <code>JAVA_HOME</code> 不会自动改变 IDEA Maven Runner。</p></div></details>
+        <details><summary>MySQL Access denied、Unknown database 或连接超时</summary><div><p>单体检查 <code>application-local.yml</code> 中 JDBC URL、用户名和密码，并确认导入单体 SQL；微服务检查 Nacos 中各个 <code>*-dev.yml</code> 配置。确认数据库服务端口与 JDBC URL 一致。</p></div></details>
+        <details><summary>Redis 连接失败、认证失败或端口被占用</summary><div><ul><li><code>Connection refused</code>：先按<a href="#redis">「Redis 启动与验证」</a>启动，并用 <code>PING</code> 确认返回 <code>PONG</code>。只打开 <code>redis-cli.exe</code> 并不会启动 Redis 服务端。</li><li><code>NOAUTH Authentication required</code>：当前 Redis 需要密码，同步核对后端 <code>spring.redis.password</code> 和实际 Redis 密码。</li><li><code>ERR Client sent AUTH, but no password is set</code>：服务端未设置密码，但客户端填写了密码；本地无密码实例应把后端密码留空。</li><li><code>6379</code> 被占用：先执行 <code>Get-NetTCPConnection -LocalPort 6379 -State Listen</code>，通过 <code>OwningProcess</code> 确认占用进程；不要直接结束未知进程。若现有 Redis 已返回 <code>PONG</code>，不必再启动第二个。</li><li>IDEA 正常但后端仍报错：确认实际激活的 profile；单体检查 <code>application-local.yml</code>，微服务检查 Nacos 中实际生效的 <code>spring.redis</code>。</li></ul></div></details>
+        <details><summary>找不到 Nacos 配置或注册中心</summary><div><p>确认 Nacos 可访问、账号有效、8848 端口可用，所需 Data ID 存在。Windows 主机运行服务时不要将 Docker 内部服务名直接用作地址。</p></div></details>
+        <details><summary>前端端口被占用</summary><div><p>换用空闲端口，如单体 <code>npm run dev -- --port 3001</code>、微服务 <code>npm run serve -- --port 1025</code>。后端代理目标仍是 5010 和 6880。</p></div></details>
+        <details><summary>npm 安装失败或 OpenSSL 报错</summary><div><p>检查 Node.js/npm 和 registry 网络；单体前端优先使用 <code>npm ci</code>。微服务前端 Windows 下可用 <code>npm run serve</code>，必要时设置 <code>NODE_OPTIONS</code> 后重试。</p></div></details>
+      </section>
+      <section id="stop"><h2>8. 停止服务与常用地址</h2><ul><li>命令行前端、后端：各自终端按 <code>Ctrl+C</code>；IDEA 服务点击 Run 面板停止按钮。</li><li>按<a href="#redis">Redis 章节 R.5</a>停止手动启动的 Redis；由 Windows 服务管理器启动的 MySQL/Redis/Nacos，按本机服务管理方式停止。</li><li>单体前端：<code>http://localhost:3000</code>；API：<code>http://127.0.0.1:5010</code>。</li><li>微服务前端：<code>http://localhost:1024</code>；Gateway：<code>http://127.0.0.1:6880</code>；Nacos：<code>http://localhost:8848/nacos</code>；监控：<code>http://localhost:6888/wallboard</code>。</li></ul></section>
+      <footer>说明依据当前仓库 README、Maven 模块、服务配置和前端配置整理。启动前请以本机实际数据库、Redis、Nacos 配置为准；前端演示账号密码按仓库说明通过公众号获取。</footer>
+    </main>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.laigeoffer.pmhub.system.mapper.ReportTemplateMapper">
+    <resultMap id="ReportTemplateResult" type="ReportTemplate">
+        <id property="templateId" column="template_id"/>
+        <result property="templateName" column="template_name"/>
+        <result property="reportCode" column="report_code"/>
+        <result property="templateJson" column="template_json"/>
+        <result property="status" column="status"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectTemplateColumns">
+        select template_id, template_name, report_code, status, remark,
+               create_by, create_time, update_by, update_time
+        from report_template
+    </sql>
+
+    <select id="selectTemplateList" parameterType="ReportTemplate" resultMap="ReportTemplateResult">
+        <include refid="selectTemplateColumns"/>
+        <where>
+            <if test="templateName != null and templateName != ''">
+                and template_name like concat('%', #{templateName}, '%')
+            </if>
+            <if test="reportCode != null and reportCode != ''">
+                and report_code = #{reportCode}
+            </if>
+            <if test="status != null and status != ''">
+                and status = #{status}
+            </if>
+        </where>
+        order by create_time desc, template_id desc
+    </select>
+
+    <select id="selectTemplateById" parameterType="Long" resultMap="ReportTemplateResult">
+        select template_id, template_name, report_code, template_json, status, remark,
+               create_by, create_time, update_by, update_time
+        from report_template
+        where template_id = #{templateId}
+    </select>
+
+    <select id="selectTemplateOptions" parameterType="String" resultType="map">
+        select template_id as templateId, template_name as templateName,
+               report_code as reportCode, status
+        from report_template
+        where report_code = #{reportCode} and status = '0'
+        order by template_id asc
+    </select>
+
+    <insert id="insertTemplate" parameterType="ReportTemplate" useGeneratedKeys="true" keyProperty="templateId">
+        insert into report_template
+            (template_name, report_code, template_json, status, remark, create_by, create_time)
+        values
+            (#{templateName}, #{reportCode}, #{templateJson}, #{status}, #{remark}, #{createBy}, sysdate())
+    </insert>
+
+    <update id="updateTemplate" parameterType="ReportTemplate">
+        update report_template
+        set template_name = #{templateName},
+            report_code = #{reportCode},
+            template_json = #{templateJson},
+            status = #{status},
+            remark = #{remark},
+            update_by = #{updateBy},
+            update_time = sysdate()
+        where template_id = #{templateId}
+    </update>
+
+    <delete id="deleteTemplateByIds" parameterType="Long">
+        delete from report_template where template_id in
+        <foreach collection="array" item="templateId" open="(" separator="," close=")">
+            #{templateId}
+        </foreach>
+    </delete>
+</mapper>

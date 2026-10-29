@@ -9,6 +9,8 @@ public interface ManualElectricityRecordMapper {
 
     ManualElectricityRecord selectRecordById(Long recordId);
 
+    List<ManualElectricityRecord> selectRecordsByIds(Long[] recordIds);
+
     int countByDateAndArea(ManualElectricityRecord record);
 
     int insertRecord(ManualElectricityRecord record);
