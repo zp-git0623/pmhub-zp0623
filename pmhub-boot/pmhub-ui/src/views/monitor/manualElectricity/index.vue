@@ -55,7 +55,18 @@
       :page.sync="queryParams.pageNum"
       :limit.sync="queryParams.pageSize"
       @pagination="getList"
-    />
+    >
+      <export-button
+        v-if="canExport"
+        slot="extra"
+        url="monitor/manualElectricity/export"
+        :params="exportParams"
+        :rows="recordList"
+        :total="total"
+        :page-num="queryParams.pageNum"
+        file-name="手工电表登记"
+      />
+    </pagination>
 
     <report-print-preview ref="printPreview" />
 
@@ -128,6 +139,17 @@ export default {
   computed: {
     canPrint() {
       return checkPermi(['monitor:manualElectricity:print'])
+    },
+    canExport() {
+      return checkPermi(['monitor:manualElectricity:export'])
+    },
+    // 导出接口只接收查询条件，不带分页参数
+    exportParams() {
+      return {
+        beginDate: this.dateRange && this.dateRange[0],
+        endDate: this.dateRange && this.dateRange[1],
+        areaName: this.queryParams.areaName
+      }
     }
   },
   created() {

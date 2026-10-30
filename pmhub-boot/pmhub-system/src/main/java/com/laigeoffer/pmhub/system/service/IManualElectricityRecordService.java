@@ -11,6 +11,11 @@ public interface IManualElectricityRecordService {
 
     List<ManualElectricityRecord> selectPrintData(Long[] recordIds);
 
+    /**
+     * 按指定记录导出（用于“导出当前页”），不参与分页。
+     */
+    List<ManualElectricityRecord> selectExportRecords(Long[] recordIds);
+
     int countByDateAndArea(ManualElectricityRecord record);
 
     int insertRecord(ManualElectricityRecord record);

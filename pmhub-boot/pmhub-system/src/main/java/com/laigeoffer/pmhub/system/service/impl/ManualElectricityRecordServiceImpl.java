@@ -48,6 +48,23 @@ public class ManualElectricityRecordServiceImpl implements IManualElectricityRec
     }
 
     @Override
+    public List<ManualElectricityRecord> selectExportRecords(Long[] recordIds) {
+        if (recordIds == null || recordIds.length == 0) {
+            throw new ServiceException("请选择需要导出的登记记录");
+        }
+        if (recordIds.length > 1000) {
+            throw new ServiceException("单次最多按记录导出1000条");
+        }
+        Set<Long> selectedIds = new HashSet<>();
+        for (Long recordId : recordIds) {
+            if (recordId == null || recordId <= 0 || !selectedIds.add(recordId)) {
+                throw new ServiceException("登记记录ID必须为不重复的正整数");
+            }
+        }
+        return recordMapper.selectRecordsByIds(recordIds);
+    }
+
+    @Override
     public int countByDateAndArea(ManualElectricityRecord record) {
         return recordMapper.countByDateAndArea(record);
     }

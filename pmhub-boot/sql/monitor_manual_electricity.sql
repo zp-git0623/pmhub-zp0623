@@ -41,6 +41,20 @@ SELECT '编辑', @manual_electricity_menu_id, 3, '', NULL, NULL, 1, 0, 'F', '0',
 FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM `sys_menu` WHERE `perms` = 'monitor:manualElectricity:edit');
 
+-- 打印权限与 export 一道在此声明，保证本脚本单跑即可授权完整功能。
+-- report_template.sql 也会声明 monitor:manualElectricity:print，两处都有 NOT EXISTS 保护，先执行哪个都不会重复插入。
+INSERT INTO `sys_menu`
+  (`menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`, `create_by`, `create_time`, `update_by`, `update_time`, `remark`)
+SELECT '打印', @manual_electricity_menu_id, 4, '', NULL, NULL, 1, 0, 'F', '0', '0', 'monitor:manualElectricity:print', '#', 'admin', NOW(), '', NULL, ''
+FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM `sys_menu` WHERE `perms` = 'monitor:manualElectricity:print');
+
+INSERT INTO `sys_menu`
+  (`menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`, `create_by`, `create_time`, `update_by`, `update_time`, `remark`)
+SELECT '导出', @manual_electricity_menu_id, 5, '', NULL, NULL, 1, 0, 'F', '0', '0', 'monitor:manualElectricity:export', '#', 'admin', NOW(), '', NULL, ''
+FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM `sys_menu` WHERE `perms` = 'monitor:manualElectricity:export');
+
 INSERT IGNORE INTO `sys_role_menu` (`role_id`, `menu_id`)
 SELECT `role_id`, @manual_electricity_menu_id FROM `sys_role`
 WHERE `role_key` = 'admin' AND `status` = '0' AND `del_flag` = '0';
@@ -51,7 +65,9 @@ FROM `sys_role` r
 JOIN `sys_menu` m ON m.`perms` IN (
   'monitor:manualElectricity:query',
   'monitor:manualElectricity:add',
-  'monitor:manualElectricity:edit'
+  'monitor:manualElectricity:edit',
+  'monitor:manualElectricity:print',
+  'monitor:manualElectricity:export'
 )
 WHERE r.`role_key` = 'admin' AND r.`status` = '0' AND r.`del_flag` = '0';
 

@@ -1,10 +1,15 @@
 <template>
-  <div :class="{'hidden':hidden}" class="pagination-container">
+  <div :class="{'hidden': hidden, 'with-extra': hasExtra}" class="pagination-container">
+    <span v-if="hasExtra" class="pagination-summary">共 {{ total }} 条</span>
+    <span v-if="hasExtra" class="pagination-extra">
+      <slot name="extra" />
+    </span>
     <el-pagination
+      class="pagination-body"
       :background="background"
       :current-page.sync="currentPage"
       :page-size.sync="pageSize"
-      :layout="layout"
+      :layout="realLayout"
       :page-sizes="pageSizes"
       :pager-count="pagerCount"
       :total="total"
@@ -63,9 +68,24 @@ export default {
   },
   data() {
     return {
-    };
+    }
   },
   computed: {
+    // 是否使用了 extra 插槽（例如导出按钮），有插槽时总条数由组件自身渲染
+    hasExtra() {
+      return !!(this.$slots && this.$slots.extra)
+    },
+    // 有 extra 插槽时去掉 layout 里的 total，避免条数重复
+    realLayout() {
+      if (!this.hasExtra) {
+        return this.layout
+      }
+      return this.layout
+        .split(',')
+        .map(item => item.trim())
+        .filter(item => item && item !== 'total')
+        .join(', ')
+    },
     currentPage: {
       get() {
         return this.page
@@ -110,5 +130,34 @@ export default {
 }
 .pagination-container.hidden {
   display: none;
+}
+/* 带 extra 插槽时：共 N 条 + 自定义操作 + 分页条 整体居中一行。
+   ruoyi.scss 里 `.pagination-container .el-pagination` 是 absolute + right:0，
+   这里必须改回 static，否则分页条会脱离文档流并与左侧内容重叠。 */
+.pagination-container.with-extra {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  height: auto;
+  min-height: 32px;
+  text-align: center;
+}
+.pagination-container.with-extra .pagination-summary {
+  margin-right: 12px;
+  color: #606266;
+  font-size: 13px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+.pagination-container.with-extra .pagination-extra {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 12px;
+}
+.pagination-container.with-extra .pagination-body {
+  position: static;
+  right: auto;
+  flex: 0 0 auto;
 }
 </style>
